@@ -242,13 +242,20 @@ if __name__ == "__main__": # test script, This is a copy of my first frequency s
 
 		print("Result:", satisfiable)
 		if satisfiable == "SAT":
+			print("[",end="")
 			for row in range(order):
-				print("[",end="")
+				if row == 0:
+					print("[",end="")
+				else:
+					print(" [",end="")
 				for x in range(order):
 					for l in range(frequency_squares):
 						print(result[l][row][x], end='')
 					if x == order - 1:
-						print("]", end='')
+						if row == order - 1:
+							print("]]", end='')
+						else:
+							print("],", end='')
 					else:
 						print(", ", end='')
 				print(" ")
