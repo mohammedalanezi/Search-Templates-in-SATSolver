@@ -18,7 +18,7 @@ kissat_elapsed = 0
 clauses = []
 
 if len(sys.argv) < 4:
-	print("Usage: python3 generate.py <order> <symbol_count> <symbol_frequencies> [k] [seed]\n") 
+	print("Usage: python3 generate.py <order> <symbol_count> <symbol_frequencies> [frequency_squares] [seed]\n") 
 	sys.exit(1)
 
 variableCount = 0
@@ -26,13 +26,13 @@ variableCount = 0
 order = int(sys.argv[1])
 symbol_count = int(sys.argv[2])
 frequencies = []
-k = 4
+frequency_squares = 4
 seed = 0
 if len(sys.argv) > 2:
 	for i in range(min(symbol_count, len(sys.argv) - 3)):
 		frequencies.append(int(sys.argv[i+3]))
 if len(sys.argv) > 3 + symbol_count:
-	k = int(sys.argv[3 + symbol_count])
+	frequency_squares = int(sys.argv[3 + symbol_count])
 if len(sys.argv) > 4 + symbol_count:
 	seed = int(sys.argv[4 + symbol_count])
 
@@ -149,8 +149,8 @@ if __name__ == "__main__": # test script, This is a copy of my first frequency s
 		s = rem % symbol_count
 		return l, r, c, s # l = 0 or 1, 0 <= r, c, s <= n - 1
 
-	variableCount = get1DIndex(k - 1, order - 1, order - 1, symbol_count - 1) 
-	for l in range(k):
+	variableCount = get1DIndex(frequency_squares - 1, order - 1, order - 1, symbol_count - 1) 
+	for l in range(frequency_squares):
 		for x in range(order):
 			for y in range(order):
 				# Each cell (x,y) has exactly one symbol
@@ -190,14 +190,14 @@ if __name__ == "__main__": # test script, This is a copy of my first frequency s
 					addClause([get1DIndex(2, x, y, 0)])
 					addClause([get1DIndex(3, x, y, 0)])
 			
-		for i in range(2, k):
-			for j in range(i + 1, k):
+		for i in range(2, frequency_squares):
+			for j in range(i + 1, frequency_squares):
 				addOrthogonalityClauses(i, j, frequencies, frequencies)
 
 		for x in range(order):
 			for y in range(order):
 				bits = []
-				for l in range(k):
+				for l in range(frequency_squares):
 					bits.append(get1DIndex(l, x, y, 1))
 				addXORClauses(bits)
 				
@@ -218,7 +218,7 @@ if __name__ == "__main__": # test script, This is a copy of my first frequency s
 	result = [] # the resulting frequency square
 	with open(output_path, "r") as f:
 		satisfiable = None
-		for l in range(k):
+		for l in range(frequency_squares):
 			result.append([])
 			for y in range(order):
 				result[l].append([])
@@ -236,7 +236,7 @@ if __name__ == "__main__": # test script, This is a copy of my first frequency s
 					if val == '0': # end of variables
 						continue
 					val = int(val)
-					if val > 0 and val <= get1DIndex(k - 1, order - 1, order - 1, symbol_count - 1):
+					if val > 0 and val <= get1DIndex(frequency_squares - 1, order - 1, order - 1, symbol_count - 1):
 						l, r, c, s = get4DIndex(val)
 						result[l][r][c] = s
 
@@ -245,7 +245,7 @@ if __name__ == "__main__": # test script, This is a copy of my first frequency s
 			for row in range(order):
 				print("[",end="")
 				for x in range(order):
-					for l in range(k):
+					for l in range(frequency_squares):
 						print(result[l][row][x], end='')
 					if x == order - 1:
 						print("]", end='')
