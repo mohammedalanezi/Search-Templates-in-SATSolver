@@ -136,18 +136,22 @@ def addXORClauses(chain): # create XOR clauses for given chain, should add 2^(le
 if __name__ == "__main__": # test script, This is a copy of my first frequency square encoding but with sinz cardinality encoding above
 	tryTemplate = True
 
-	def get1DIndex(l, r, c, s): # latin square, row, col, symbol, l = 0 or 1, 0 <= r, s, c <= n - 1
-		return l * order * order * symbol_count + r * order * symbol_count + c * symbol_count + s + 1 # 1 to n^3
+	def get1DIndex(l, r, c, s):
+		index = 4 * order * symbol_count * r 
+		index += 4 * symbol_count * c 
+		index += symbol_count * l
+		index += s 
+		return index + 1
 
 	def get4DIndex(v): 
-		v = v - 1  # Make it 0-based
-		l = v // (order * order * symbol_count)
-		rem = v % (order * order * symbol_count)
-		r = rem // (order * symbol_count)
-		rem = rem % (order * symbol_count)
-		c = rem // symbol_count
+		v = v - 1 
+		r = v // (4 * order * symbol_count)
+		rem = v % (4 * order * symbol_count)
+		c = rem // (4 * symbol_count)
+		rem = rem % (4 * symbol_count)
+		l = rem // symbol_count
 		s = rem % symbol_count
-		return l, r, c, s # l = 0 or 1, 0 <= r, c, s <= n - 1
+		return l, r, c, s
 
 	variableCount = get1DIndex(frequency_squares - 1, order - 1, order - 1, symbol_count - 1) 
 	for l in range(frequency_squares):
@@ -214,7 +218,7 @@ if __name__ == "__main__": # test script, This is a copy of my first frequency s
 		subprocess.run(commands, stdout=out_file, stderr=subprocess.STDOUT)
 	kissat_elapsed = round((time.time() - kissat_time) * 100)/100
 	print("Wrote Kissat output to:", output_path)
-			
+	
 	result = [] # the resulting frequency square
 	with open(output_path, "r") as f:
 		satisfiable = None
