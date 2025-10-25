@@ -1,9 +1,12 @@
 import os
+import time
 import pynauty
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(script_dir)
 solution_set_path = os.path.join(script_dir, "solution set.txt")
+
+start_time = time.time()
 
 certificates = []
 order = 10
@@ -71,41 +74,54 @@ def create_template(line):
         template[l][c][r] = s
     return template
 
-def create_graph(template): #rewrite to be easier to read from just sight, e.g. avoid arthimetic expressions
+def create_graph(template):
     vertex_count = order*order + order*2 + 4 + 4 # 100 points, 10 rows and 10 columns, 4 symbols, 4 "pivot" vertices [R,C,S1,S2]
-    adjacency_dict = {}
+    
     point_count = order * order - 1
+    R = point_count + order*2 + 4 + 1
+    C = point_count + order*2 + 4 + 2
+    S1 = point_count + order*2 + 4 + 3
+    S2 = point_count + order*2 + 4 + 4
+
+    adjacency_dict = {}
+    for i in range(vertex_count):
+        adjacency_dict[i] = []
+    
+    def add_vertex(id_from, id_to):
+        adjacency_dict[id_from].append(id_to)
+        adjacency_dict[id_to].append(id_from)
 
     for r in range(order):
         for c in range(order):
-            id = r * 10 + c # x_{r,c}
             symbol1 = template[2][c][r]
             symbol2 = template[3][c][r]
-            adjacency_dict[id] = [point_count + r + 1, # row                            # 100 - 109
-                                  point_count + order + c + 1, # col                    # 110 - 119
-                                  point_count + order*2 + symbol1 + 1, # symbol 1       # 120 - 121
-                                  point_count + order*2 + 2 + symbol2 + 1 # symbol 2    # 122 - 123
-                                  ]
-            
-        adjacency_dict[point_count + r + 1]         = [point_count + order*2 + 4 + 1] # r_i to R
-        adjacency_dict[point_count + order + r + 1] = [point_count + order*2 + 4 + 2] # c_i to C
+            id = r * 10 + c # x_{r,c}                               #   0 -  99
+            add_vertex(id, point_count + r + 1)                     # 100 - 109
+            add_vertex(id, point_count + order + c + 1)             # 110 - 119
+            add_vertex(id, point_count + order*2 + symbol1 + 1)     # 120 - 121
+            add_vertex(id, point_count + order*2 + 2 + symbol2 + 1) # 122 - 123
+        
+        add_vertex(point_count + r + 1, R) # r_i to R
+        add_vertex(point_count + order + r + 1, C) # c_i to C
 
-    adjacency_dict[point_count + order*2 + 1] = [point_count + order*2 + 4 + 3] # s1_{0} to S1
-    adjacency_dict[point_count + order*2 + 2] = [point_count + order*2 + 4 + 3] # s1_{1} to S1
-    adjacency_dict[point_count + order*2 + 3] = [point_count + order*2 + 4 + 4] # s2_{0} to S2
-    adjacency_dict[point_count + order*2 + 4] = [point_count + order*2 + 4 + 4] # s2_{1} to S2
+    add_vertex(point_count + order*2 + 1, S1) # s1_{0} to S1
+    add_vertex(point_count + order*2 + 2, S1) # s1_{1} to S1
+    add_vertex(point_count + order*2 + 3, S2) # s2_{0} to S2
+    add_vertex(point_count + order*2 + 4, S2) # s2_{1} to S2
 
     vertex_coloring = [
-        set(range(order*order + order*2)), # GREY
-        set([point_count + order*2 + 4 + 1, point_count + order*2 + 4 + 2]), # RED
-        set([point_count + order*2 + 4 + 3, point_count + order*2 + 4 + 4])  # BLUE
+        set(range(order*order + order*2 + 4)), # GREY
+        set([R, C]), # RED
+        set([S1, S2])  # BLUE
     ]
 
     return pynauty.Graph(vertex_count, False, adjacency_dict, vertex_coloring)
 
 with open(solution_set_path, "r") as f:
-    c = 0
+    cert_count = 0
+    line_count = 0
     for line in f:
+        line_count = line_count + 1
         line = line.strip()
         line = line[16:-1] # skip trailing zeros and starting statements
         line = [(int(x)) for x in line.split()] # Converts line into list of variables
@@ -114,8 +130,14 @@ with open(solution_set_path, "r") as f:
         cert = pynauty.certificate(graph)
         if cert not in certificates:
             certificates.append(cert)
-            c = c + 1
-            if c % 100 == 0:
-                print(f"new certificate, #{c}")
+            cert_count = cert_count + 1
+            if cert_count % 100 == 0:
+                print(f"new certificate, #{cert_count}")
+        if line_count % 10000 == 0:
+            print(f"current line: {line_count}")
+        if line_count == 50:
+            print(graph)
 
 print(len(certificates))
+
+print("Total elapsed time of script:", round((time.time() - start_time) * 100)/100, "seconds")
