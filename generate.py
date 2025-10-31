@@ -35,8 +35,6 @@ def addClause(variables):
 	return True
 
 def addImplicationClause(antecedent, consequent): # conjunction(AND) of all antecedental variables implies the disjunction(OR) of consequental variables, e.g. "x1 and .. and xn" implies "y1 or ... or yn"
-	if len(antecedent) == 0 or len(consequent) == 0:
-		return False
 	clause = "" # X implies Y is equivalent to -X OR Y
 	for x in antecedent:
 		clause += str(-x) + " "
@@ -222,24 +220,24 @@ if __name__ == "__main__": # test this with cadical exhauste, its open sourced o
 					addCardinalityClauses(col_vars, frequencies[z], frequencies[z])
 	
 	if tryTemplate:
-		a = [get1DIndex(2, 5, y+1, 1) for y in range(3)]
-		b = [get1DIndex(2, 6, y+1, 1) for y in range(3)]
+		a = [get1DIndex(2, y+1, 5, 1) for y in range(3)]
+		b = [get1DIndex(2, y+1, 6, 1) for y in range(3)]
 		addLexicographicalOrder(a, b)
 		
-		a=[get1DIndex(2, 7, y+1, 1) for y in range(3)]
-		b=[get1DIndex(2, 8, y+1, 1) for y in range(3)]
-		c=[get1DIndex(2, 9, y+1, 1) for y in range(3)]
+		a=[get1DIndex(2, y+1, 7, 1) for y in range(3)]
+		b=[get1DIndex(2, y+1, 8, 1) for y in range(3)]
+		c=[get1DIndex(2, y+1, 9, 1) for y in range(3)]
 		addLexicographicalOrder(a, b)
 		addLexicographicalOrder(b, c)
-		#addLexicographicalOrder(a, c)
+		#addLexicographicalOrder(a, c) # not needed
 
 		for i in range(2):
-			a=[get1DIndex(2, 1, y+4 + 3*i, 1) for y in range(3)]
-			b=[get1DIndex(2, 2, y+4 + 3*i, 1) for y in range(3)]
-			c=[get1DIndex(2, 3, y+4 + 3*i, 1) for y in range(3)]
+			a=[get1DIndex(2, 4 + 3*i, x+1, 1) for x in range(3)]
+			b=[get1DIndex(2, 5 + 3*i, x+1, 1) for x in range(3)]
+			c=[get1DIndex(2, 6 + 3*i, x+1, 1) for x in range(3)]
 			addLexicographicalOrder(a, b)
 			addLexicographicalOrder(b, c)
-			#addLexicographicalOrder(a, c)
+			#addLexicographicalOrder(a, c) # not needed
 
 		for x in range(order):
 			for y in range(order):
@@ -269,17 +267,18 @@ if __name__ == "__main__": # test this with cadical exhauste, its open sourced o
 				bits = []
 				for l in range(frequency_squares):
 					bits.append(get1DIndex(l, x, y, 1))
-				pass #addXORClauses(bits)
+				pass #addXORClauses(bits) # not needed
 		
 		for x in range(4,7):
-			addClause([get1DIndex(3, x, 0, 1)])
 			addClause([get1DIndex(3, 0, x, 1)])
+			addClause([get1DIndex(3, x, 0, 1)])
 			
-			addClause([get1DIndex(2, x+3, 0, 1)])
-			addClause([get1DIndex(2, 0, x+3, 1)])
-		addClause([get1DIndex(3, 4, 1, 1)])
-		addClause([get1DIndex(2, 4, 2, 1)])
-		addClause([get1DIndex(2, 4, 3, 1)])
+		for x in range(7,10):
+			addClause([get1DIndex(2, 0, x, 1)])
+			addClause([get1DIndex(2, x, 0, 1)])
+		addClause([get1DIndex(3, 1, 4, 1)])
+		addClause([get1DIndex(2, 2, 4, 1)])
+		addClause([get1DIndex(2, 3, 4, 1)])
 		
 	with open(input_path, "w") as f:
 		f.write(f"p cnf {variableCount} {len(clauses)}\n")
