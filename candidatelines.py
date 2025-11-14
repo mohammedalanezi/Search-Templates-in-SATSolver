@@ -183,7 +183,7 @@ if __name__ == "__main__":
 					weight_buckets[weight].append(get1DIndex(r, c))
 
 	if relational_lines == True:
-		addCardinalityClauses(weight_buckets.get(2, []), 1, 1)  # exactly nine weight-4
+		addCardinalityClauses(weight_buckets.get(4, []), 1, 1)  # exactly one weight-4
 		addCardinalityClauses(weight_buckets.get(2, []), 9, 9)  # exactly nine weight-2
 	elif relational_lines == False:
 		addCardinalityClauses(weight_buckets.get(2, []), 6, 6)  # exactly six weight-2
@@ -214,5 +214,6 @@ if __name__ == "__main__":
 	print("\nTotal elapsed time of script:", round((time.time() - start_time) * 100)/100, "seconds")
 	print("     Dimacs elapsed time:", dimacs_elapsed, "seconds")
 	print("     SAT Solver elapsed time:", kissat_elapsed, "seconds")
+
 
 # cd /mnt/g/Code/sat\ solver\ stuff/search\ templates
